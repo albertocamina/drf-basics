@@ -3,6 +3,7 @@ from django.shortcuts import render
 
 from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelViewSet
 from rest_framework import generics, mixins, permissions
+from rest_framework.throttling import AnonRateThrottle
 
 from recetas.models import *
 from recetas.serializers import *
@@ -22,6 +23,7 @@ class IngredientesView( generics.ListCreateAPIView ):
     model               = Ingrediente
     serializer_class    = IngredienteSerializer
     queryset            = Ingrediente.objects.all()
+    throttle_classes    = [AnonRateThrottle]
 
 class IngredienteDeleteView( generics.DestroyAPIView ):
     """ Vista para borrar ingredientes. Solo admite los DELETE """
