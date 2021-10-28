@@ -1,3 +1,7 @@
 from django.db import models
 
-# Create your models here.
+class WhiteList( models.Model ):
+    host = models.CharField( max_length=255, blank=False, null=False )
+
+class BlackList( models.Model ):
+    host = models.CharField( max_length=255, blank=False, null=False )

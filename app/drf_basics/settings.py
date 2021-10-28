@@ -25,7 +25,7 @@ SECRET_KEY = 'jax%tox0osmxm!xg0#3m#ntpz7#1-jmoszj95aj^7o1m3ec!+t'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -126,6 +126,10 @@ STATIC_URL = '/static/'
 
 # Configuraciones para Django Rest Framework
 REST_FRAMEWORK = {
+    # Además de servir para quitar el tipico redering por HTML basico de Django
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 25
 }
