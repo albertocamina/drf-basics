@@ -12,8 +12,6 @@ class WhiteListPermission( permissions.BasePermission ):
         dominio     = request.META['REMOTE_HOST']
         _ip          = request.META['REMOTE_ADDR']
 
-        print("WhiteList")
-        print( WhiteList.objects.filter(Q( host=dominio)|Q(host=_ip)).exists() )
         return WhiteList.objects.filter(Q( host=dominio)|Q(host=_ip)).exists()
 
 class BlackListPermission( permissions.BasePermission ):
@@ -23,9 +21,6 @@ class BlackListPermission( permissions.BasePermission ):
         
         dominio     = request.META['REMOTE_HOST']
         ip          = request.META['REMOTE_ADDR']
-
-        print("BlackList")
-        print(not BlackList.objects.filter(Q( host=dominio)|Q(host=ip)).exists())
 
         return not BlackList.objects.filter(Q( host=dominio)|Q(host=ip)).exists()
 

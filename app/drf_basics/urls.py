@@ -19,4 +19,5 @@ from django.urls.conf import include
 
 urlpatterns = [
     path( 'recetario/', include("recetas.urls") ),
+    path( 'auth/', include("auth_methods.urls") ),
 ]

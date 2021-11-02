@@ -18,6 +18,8 @@ recetas_simple_router.register( r'ingredientespublic', IngredientesPublicViewSet
 
 
 urlpatterns = [
+
+    url( r"^tiporeceta/$", API_get_tipo_recetas, name="recetas_tiporeceta_list" ),
     url( r"^ingredientes/$", IngredientesView.as_view(), name="ingredientes" ),
     url( r"^ingredientes/(?P<pk>[0-9]+)/delete$", IngredienteDeleteView.as_view(), name="ingredientes_delete" ),
 ]

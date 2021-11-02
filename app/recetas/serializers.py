@@ -1,3 +1,4 @@
+from django.db.models import fields
 from rest_framework import serializers, viewsets
 
 from recetas.models import *
@@ -20,8 +21,34 @@ class IngredienteSerializer( serializers.ModelSerializer ):
 
         return value
 
+class TipoRecetaSerializer( serializers.ModelSerializer ):
+
+    # Añadimos un nuevo campo
+    numero_recetas = serializers.IntegerField( default=0 )
+
+    class Meta: 
+        model   = TipoReceta
+        fields  = [ "id", "nombre", "numero_recetas" ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        # Contamos el numero de recetas para dicho tipo que existe
+        numero_recetas = Receta.objects.filter( tipo=data.get('id', None ) ).count()
+
+        # Lo añadimos al diccionario
+        data["numero_recetas"] = numero_recetas
+
+
+        return data
+
 class RecetaSerializer( serializers.ModelSerializer ):
+    # Con esto, ya pasamos el serializador para el campo de los ingredientes
+    ingredientes = IngredienteSerializer( many=True )
+    tipo         = TipoRecetaSerializer()
 
     class Meta:
         model   = Receta
         fields  = "__all__"
+
+    

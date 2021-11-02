@@ -1,15 +1,43 @@
+from django.contrib import auth
 from django.db.models.query import QuerySet
 from django.shortcuts import render
+from rest_framework import status
 
 from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.response import Response
+from rest_framework.status import *
 from rest_framework import generics, mixins, permissions
 from rest_framework.throttling import AnonRateThrottle
+from rest_framework.authentication import *
+from rest_framework.permissions import *
+from rest_framework.decorators import *
+from auth_methods.permissions import WhiteListPermission, BlackListPermission
+
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 from recetas.models import *
 from recetas.serializers import *
-from auth_methods.permissions import WhiteListPermission, BlackListPermission
+from recetas.filters import *
 
-### Vista basada en funciones para poder crear los tipos de 
+
+
+### Vista basada en funciones para poder crear los tipos de recetas ### 
+
+@api_view(['GET'])
+@authentication_classes([ JWTAuthentication ])
+@permission_classes([ IsAuthenticated ])
+def API_get_tipo_recetas( request ):
+    """ Funcion para recuperar los tipos de recetas existentes """
+
+    # Cogemos todos los tipos de recetas
+    tipos_recetas = TipoReceta.objects.all()
+
+    # Cogemos el serializador
+    tipos_recetas_ser = TipoRecetaSerializer( tipos_recetas, many=True )
+    
+    return Response( tipos_recetas_ser.data, status=HTTP_200_OK )
+
 
 ##############################################################################
 ##############################################################################
@@ -20,16 +48,32 @@ from auth_methods.permissions import WhiteListPermission, BlackListPermission
 class IngredientesView( generics.ListCreateAPIView ):
     """ Vista para poder listar y crear ingredientes. Solo admite los GET en modo lista y el CREATE """
 
-    model               = Ingrediente
-    serializer_class    = IngredienteSerializer
-    queryset            = Ingrediente.objects.all()
-    throttle_classes    = [AnonRateThrottle]
+    model                   = Ingrediente
+    serializer_class        = IngredienteSerializer
+    queryset                = Ingrediente.objects.all()
+    throttle_classes        = [AnonRateThrottle]
+    authentication_classes  = [ BasicAuthentication ]
+    permission_classes      = [ IsAuthenticated ]
+
+    search_fields           = ["nombre", "calorias"]
+    ordering_fields         = ["nombre"]
+    filterset_fields        = [ "id" ]
+
+
+    ### Más info ### 
+    # Para la autentificación básica, se mandas credenciales de usuario en las cabeceras HTTP, 
+    # Recomendable usar HTTPS para este método o no será seguro
+
+    # Se debe mandar un header: Authorization Basic YWxiZXJ0by5jYW1pbmE6YWRtaW4=
+    # Donde la parte en Base64 es {username}:{password}
+
 
 class IngredienteDeleteView( generics.DestroyAPIView ):
     """ Vista para borrar ingredientes. Solo admite los DELETE """
 
     model               = Ingrediente
     queryset            = Ingrediente.objects.all()
+
 
 ##############################################################################
 ##############################################################################
@@ -45,9 +89,10 @@ class IngredientesPrivateViewSet(   mixins.DestroyModelMixin,
         mixin de destroy y al de update, seguido del generic view set para poder generar los metodos necesarios.
     """
 
-    model               = Ingrediente
-    serializer_class    = IngredienteSerializer
-    queryset            = Ingrediente.objects.all() 
+    model                   = Ingrediente
+    serializer_class        = IngredienteSerializer
+    queryset                = Ingrediente.objects.all() 
+
 
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
@@ -73,16 +118,32 @@ class IngredientesPublicViewSet( ReadOnlyModelViewSet ):
 # Vistas para recetas con un ModelViewSet completisimo #
 
 class RecetasViewSet( ModelViewSet ):
-    """ Vista basada en un ViewSet de modelos de recetas completo """
+    """ Vista basada en un ViewSet de modelos de recetas completo 
 
-    model               = Receta
-    serializer_class    = RecetaSerializer
-    queryset            = Receta.objects.all() 
+        El modo de autentificacion y permisos es para un usuario por Token asignado
+
+    """
+
+    model                   = Receta
+    serializer_class        = RecetaSerializer
+    queryset                = Receta.objects.all() 
+    authentication_classes  = [ TokenAuthentication ]
+    permission_classes      = [ IsAuthenticated ]
+
+    filterset_class         = RecetasFilterSet
+
 
 ##############################################################################
 ##############################################################################
 ##############################################################################
 
+### Vista para crear los Deseos ### 
+
+
+
+##############################################################################
+##############################################################################
+##############################################################################
 
 
 
