@@ -21,6 +21,7 @@ class IngredienteSerializer( serializers.ModelSerializer ):
 
         return value
 
+
 class TipoRecetaSerializer( serializers.ModelSerializer ):
 
     # Añadimos un nuevo campo
@@ -41,6 +42,7 @@ class TipoRecetaSerializer( serializers.ModelSerializer ):
 
 
         return data
+
 
 class RecetaSerializer( serializers.ModelSerializer ):
     # Con esto, ya pasamos el serializador para el campo de los ingredientes

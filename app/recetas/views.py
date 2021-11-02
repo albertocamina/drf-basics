@@ -11,6 +11,7 @@ from rest_framework.throttling import AnonRateThrottle
 from rest_framework.authentication import *
 from rest_framework.permissions import *
 from rest_framework.decorators import *
+from rest_framework.renderers import TemplateHTMLRenderer
 from auth_methods.permissions import WhiteListPermission, BlackListPermission
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -132,6 +133,24 @@ class RecetasViewSet( ModelViewSet ):
 
     filterset_class         = RecetasFilterSet
 
+class RecetasViewSetHTML( ModelViewSet ):
+    """ Vista basada en un ViewSet de modelos de recetas completo 
+
+        El modo de autentificacion y permisos es para un usuario por Token asignado
+
+    """
+
+    model                   = Receta
+    serializer_class        = RecetaSerializer
+    queryset                = Receta.objects.all() 
+    authentication_classes  = [ TokenAuthentication ]
+    permission_classes      = [ IsAuthenticated ]
+
+    # Decimos que la clase para renderizar es un HTML
+    renderer_classes        = [ TemplateHTMLRenderer ]
+    template_name           = "recetas.html"
+    
+    filterset_class         = RecetasFilterSet
 
 ##############################################################################
 ##############################################################################

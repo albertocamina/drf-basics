@@ -10,6 +10,7 @@ app_name = "recetas"
 
 recetas_router = DefaultRouter()
 recetas_router.register( r'recetas', RecetasViewSet, basename="recetas"  )
+recetas_router.register( r'recetashtml', RecetasViewSetHTML, basename="recetas_html" )
 
 recetas_simple_router = SimpleRouter() 
 recetas_simple_router.register( r'ingredientesprivate', IngredientesPrivateViewSet, basename="ingredientesprivate"  )
