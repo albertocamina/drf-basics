@@ -4,3 +4,4 @@ markdown
 django-filter
 djangorestframework-simplejwt
 django-oauth-toolkit
+Pillow

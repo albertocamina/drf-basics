@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
+    'oauth2_provider',
     'django_filters',
 
     'auth_methods',
@@ -62,7 +63,9 @@ ROOT_URLCONF = 'drf_basics.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            "drf_basics/templates"
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -127,6 +130,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+MEDIA_URL  = '/media/'
+
 # Configuraciones para Django Rest Framework
 REST_FRAMEWORK = {
     # Además de servir para quitar el tipico redering por HTML de APIView basico de Django
@@ -165,4 +170,7 @@ SIMPLE_JWT = {
 
     'JTI_CLAIM': 'jti',
 }
+
+
+LOGIN_URL='/admin/login/'
 
