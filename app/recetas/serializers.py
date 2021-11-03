@@ -53,4 +53,9 @@ class RecetaSerializer( serializers.ModelSerializer ):
         model   = Receta
         fields  = "__all__"
 
-    
+class FotografiaRecetaSerializer( serializers.ModelSerializer ):
+
+    class Meta:
+        model               = Receta
+        fields              = [ "id", "imagen" ]
+        readonly_field      = [ "id" ]

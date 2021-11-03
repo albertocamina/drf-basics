@@ -65,7 +65,7 @@ class IngredientesView( generics.ListCreateAPIView ):
     # Para la autentificación básica, se mandas credenciales de usuario en las cabeceras HTTP, 
     # Recomendable usar HTTPS para este método o no será seguro
 
-    # Se debe mandar un header: Authorization Basic YWxiZXJ0by5jYW1pbmE6YWRtaW4=
+    # Se debe mandar un header: Authorization Basic {base64 data}
     # Donde la parte en Base64 es {username}:{password}
 
 
@@ -133,6 +133,40 @@ class RecetasViewSet( ModelViewSet ):
 
     filterset_class         = RecetasFilterSet
 
+    def get_serializer_class(self):
+
+        if self.action == "upload_imagen":
+            return FotografiaRecetaSerializer
+
+        return super().get_serializer_class()
+
+    @action( methods=["POST"], detail=True, url_path="upload-imagen")
+    def upload_imagen( self, request, pk=None ):
+        """ Acción para subir una imagen """
+
+        # Cogemos la receta necesaria
+        receta = self.get_object()
+        # Serializamos los datos que llegan
+        serializer = self.get_serializer(
+            receta,
+            data=request.data
+        )
+
+        # Comprobamos que sea correcta
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response( 
+                serializer.data,
+                status=HTTP_200_OK
+            )
+
+        return Response(
+            serializer.errors,
+            status=HTTP_400_BAD_REQUEST
+        )
+
+
 class RecetasViewSetHTML( ModelViewSet ):
     """ Vista basada en un ViewSet de modelos de recetas completo 
 
@@ -151,6 +185,8 @@ class RecetasViewSetHTML( ModelViewSet ):
     template_name           = "recetas.html"
     
     filterset_class         = RecetasFilterSet
+
+
 
 ##############################################################################
 ##############################################################################
