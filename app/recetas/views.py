@@ -12,7 +12,7 @@ from rest_framework.authentication import *
 from rest_framework.permissions import *
 from rest_framework.decorators import *
 from rest_framework.renderers import TemplateHTMLRenderer
-from auth_methods.permissions import WhiteListPermission, BlackListPermission
+from auth_methods.permissions import WhiteListPermission, BlackListPermission, PermsClassPermission
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -98,6 +98,7 @@ class IngredientesPrivateViewSet(   mixins.DestroyModelMixin,
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 
+
 ##############################################################################
 ##############################################################################
 ##############################################################################
@@ -111,6 +112,7 @@ class IngredientesPublicViewSet( ReadOnlyModelViewSet ):
     queryset            = Ingrediente.objects.all()
     # Solo se puede acceder si estas en la lista blanca y no en la lista negra
     permission_classes  = [ WhiteListPermission, BlackListPermission ]
+
 
 ##############################################################################
 ##############################################################################
@@ -187,14 +189,60 @@ class RecetasViewSetHTML( ModelViewSet ):
     filterset_class         = RecetasFilterSet
 
 
-
 ##############################################################################
 ##############################################################################
 ##############################################################################
 
-### Vista para crear los Deseos ### 
+### Vista para crear los Deseos. Se hace basada en funciones pues es lo más sencillo ### 
+@api_view(['GET'])
+@authentication_classes([ TokenAuthentication ])
+@permission_classes([ IsAuthenticated ])
+def SwitchDeseo( request, **kwargs ):
+    """ Vista para hacer swithc de recetas como deseos. Tiene la particulairdad de que 
+    se necesitan los perms de Django para poder acceder """
+
+    # Miramos si el usuario tiene el permiso necesarios
+    if not request.user.has_perm("recetas.add_deseo"):
+        return Response({}, status=HTTP_403_FORBIDDEN)
+
+    # Sacamos el ID de la receta que queremos coger
+    receta_id   = kwargs.get('pk', None )
+
+    # Cogemos la receta, si no existe, devolvemos un 404
+    receta      = Receta.objects.filter( id=receta_id ).first()
+
+    if receta is None:
+        return Response( { "msg": "Receta not Found" }, status=status.HTTP_400_BAD_REQUEST )
+    
+    # Miramos si el usuario usuario tiene la receta en Deseos
+    deseo, creado = Deseo.objects.get_or_create( usuario=request.user, receta=receta )
+
+    # Si no fue creada, entonces borramos y devolvemos 204
+    if not creado:
+        deseo.delete()
+        response = Response({}, status=HTTP_204_NO_CONTENT)
+    # Si fue creada, entonces mandamos el 201
+    else:
+        response = Response({ "id": deseo.id }, status=HTTP_201_CREATED )
+
+    return response
 
 
+class DeseoListAPIView( generics.ListAPIView ):
+    """ Vista de Lista para los Deseos. Tiene la particularidad de que se necesita 
+    tener los perms de Django para poder acceder """
+
+    model                   = Deseo
+    serializer_class        = DeseoSerializer
+    authentication_classes  = [ TokenAuthentication ]
+    permission_classes      = [ IsAuthenticated, PermsClassPermission ]
+    page_size               = 2
+
+    required_perms          = [ "recetas.add_deseo"]
+
+    def get_queryset(self):
+        queryset = self.model.objects.filter( usuario=self.request.user )
+        return queryset
 
 ##############################################################################
 ##############################################################################
