@@ -1,0 +1,33 @@
+version: "1"
+
+services:
+
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgress
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    networks:
+      - main
+
+  web:
+    build: .
+    command: bash -c "python app/manage.py migrate && python app/manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./:/opt/
+    ports:
+      - "8000:8000"
+    links:
+      - "db:database"
+    depends_on:
+      - db
+    networks:
+      - main
+
+networks:
+  main:
